@@ -6,23 +6,6 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 
-ACCESS_PASSWORD = os.environ.get("ACCESS_PASSWORD", "801300")
-
-@app.before_request
-def check_auth():
-    if request.path.startswith("/api/") and request.path != "/api/auth":
-        client_password = request.headers.get("X-Access-Password")
-        if client_password != ACCESS_PASSWORD:
-            return jsonify({"error": "비밀번호 인증이 필요합니다."}), 401
-
-@app.route("/api/auth", methods=["POST"])
-def authenticate():
-    data = request.json or {}
-    password = data.get("password")
-    if password == ACCESS_PASSWORD:
-        return jsonify({"success": True, "message": "인증 성공"})
-    return jsonify({"error": "비밀번호가 올바르지 않습니다."}), 401
-
 @app.after_request
 def add_header(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -312,6 +295,7 @@ def get_stats():
         "today_stats": today_stats,
         "monthly_trends": trends
     })
+
 # 8. Upload Excel file and sync data
 @app.route("/api/upload", methods=["POST"])
 def upload_excel():

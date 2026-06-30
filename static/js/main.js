@@ -41,10 +41,6 @@ const elements = {
     attendanceStatsGrid: document.getElementById('attendanceStatsGrid'),
     detailTotalLates: document.getElementById('detailTotalLates'),
     detailMonthLates: document.getElementById('detailMonthLates'),
-    openUploadModalBtn: document.getElementById('openUploadModalBtn'),
-    uploadExcelModal: document.getElementById('uploadExcelModal'),
-    excelFileInput: document.getElementById('excelFileInput'),
-    submitExcelUploadBtn: document.getElementById('submitExcelUploadBtn'),
     editEmployeeBtn: document.getElementById('editEmployeeBtn'),
     
     // Calendar elements
@@ -69,57 +65,60 @@ const elements = {
     attModalName: document.getElementById('attModalName'),
     statusSelectGrid: document.getElementById('statusSelectGrid'),
     
-    // Auth elements
+    // Toast
+    toastMessage: document.getElementById('toastMessage'),
+
+    // Excel Upload Modal
+    openUploadModalBtn: document.getElementById('openUploadModalBtn'),
+    uploadExcelModal: document.getElementById('uploadExcelModal'),
+    excelFileInput: document.getElementById('excelFileInput'),
+    submitExcelUploadBtn: document.getElementById('submitExcelUploadBtn'),
+
+    // Auth Screen Elements
     authOverlay: document.getElementById('authOverlay'),
     accessPasswordInput: document.getElementById('accessPasswordInput'),
     loginSubmitBtn: document.getElementById('loginSubmitBtn'),
-    authErrorMsg: document.getElementById('authErrorMsg'),
-    
-    // Toast
-    toastMessage: document.getElementById('toastMessage')
+    authErrorMsg: document.getElementById('authErrorMsg')
 };
 
 // Init Application
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        setupEventListeners();
-        checkExistingAuth();
-    } catch (e) {
-        alert("근태관리 시스템 초기화 에러:\n" + e.message + "\n" + e.stack);
-    }
+    checkExistingAuth();
+    setupEventListeners();
 });
 
-// Authentication Helpers
-function getAuthHeader() {
-    return {
-        'X-Access-Password': sessionStorage.getItem('accessPassword') || ''
-    };
+// Check if user is already authenticated via sessionStorage
+function checkExistingAuth() {
+    const savedPassword = sessionStorage.getItem('accessPassword');
+    if (savedPassword === '801300') {
+        elements.authOverlay.style.display = 'none';
+        fetchEmployees();
+        fetchStats();
+    } else {
+        elements.authOverlay.style.display = 'flex';
+        elements.accessPasswordInput.focus();
+    }
 }
 
-async function checkExistingAuth() {
-    const password = sessionStorage.getItem('accessPassword');
-    if (!password) {
-        elements.authOverlay.style.display = 'flex';
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/auth', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        if (response.ok) {
-            elements.authOverlay.style.display = 'none';
-            fetchEmployees();
-            fetchStats();
-        } else {
-            sessionStorage.removeItem('accessPassword');
-            elements.authOverlay.style.display = 'flex';
-        }
-    } catch (error) {
-        sessionStorage.removeItem('accessPassword');
-        elements.authOverlay.style.display = 'flex';
+// Handle login attempt
+function handleLogin() {
+    const password = elements.accessPasswordInput.value.trim();
+    if (password === '801300') {
+        sessionStorage.setItem('accessPassword', password);
+        elements.authOverlay.style.display = 'none';
+        showToast('보안 인증에 성공했습니다.');
+        fetchEmployees();
+        fetchStats();
+    } else {
+        const card = document.querySelector('.auth-card');
+        card.classList.add('shake');
+        elements.authErrorMsg.style.display = 'block';
+        elements.accessPasswordInput.value = '';
+        elements.accessPasswordInput.focus();
+        
+        setTimeout(() => {
+            card.classList.remove('shake');
+        }, 500);
     }
 }
 
@@ -149,13 +148,7 @@ window.closeModal = function(modalId) {
 // API Calls
 async function fetchEmployees(searchQuery = '') {
     try {
-        const response = await fetch(`/api/employees?q=${encodeURIComponent(searchQuery)}`, {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
+        const response = await fetch(`/api/employees?q=${encodeURIComponent(searchQuery)}`);
         if (!response.ok) throw new Error('직원 정보를 불러오지 못했습니다.');
         state.employees = await response.json();
         renderEmployeeList();
@@ -166,13 +159,7 @@ async function fetchEmployees(searchQuery = '') {
 
 async function fetchStats() {
     try {
-        const response = await fetch('/api/stats', {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
+        const response = await fetch('/api/stats');
         if (!response.ok) throw new Error('통계 데이터를 불러오지 못했습니다.');
         const stats = await response.json();
         renderDashboard(stats);
@@ -183,13 +170,7 @@ async function fetchStats() {
 
 async function fetchEmployeeAttendance(employeeId, year, month) {
     try {
-        const response = await fetch(`/api/employees/${employeeId}/attendance?year=${year}&month=${month}`, {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
+        const response = await fetch(`/api/employees/${employeeId}/attendance?year=${year}&month=${month}`);
         if (!response.ok) throw new Error('근태 정보를 불러오지 못했습니다.');
         const data = await response.json();
         
@@ -212,6 +193,16 @@ async function fetchEmployeeAttendance(employeeId, year, month) {
 
 // Setup Event Listeners
 function setupEventListeners() {
+    // Login Submit Button Click
+    elements.loginSubmitBtn.addEventListener('click', handleLogin);
+    
+    // Login Input Enter Key Press
+    elements.accessPasswordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+
     // Search input typing
     elements.employeeSearchInput.addEventListener('input', (e) => {
         fetchEmployees(e.target.value);
@@ -223,14 +214,7 @@ function setupEventListeners() {
         elements.syncExcelBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 동기화 중...';
         
         try {
-            const response = await fetch('/api/sync', { 
-                method: 'POST',
-                headers: getAuthHeader()
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
+            const response = await fetch('/api/sync', { method: 'POST' });
             const result = await response.json();
             if (response.ok) {
                 showToast(result.message || '성공적으로 동기화되었습니다.');
@@ -247,52 +231,47 @@ function setupEventListeners() {
         }
     });
 
-    // Open Upload Modal
+    // Open Upload Excel Modal
     elements.openUploadModalBtn.addEventListener('click', () => {
-        document.getElementById('uploadExcelForm').reset();
+        elements.excelFileInput.value = '';
         openModal('uploadExcelModal');
     });
 
-    // Submit Excel Upload
+    // Submit Excel File Upload
     elements.submitExcelUploadBtn.addEventListener('click', async () => {
         const fileInput = elements.excelFileInput;
         if (fileInput.files.length === 0) {
-            showToast('업로드할 엑셀 파일을 선택해주세요.', 'error');
+            showToast('엑셀 파일을 선택해주세요.', 'error');
             return;
         }
-
+        
         const file = fileInput.files[0];
         const formData = new FormData();
         formData.append('file', file);
-
+        
         elements.submitExcelUploadBtn.disabled = true;
-        elements.submitExcelUploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 업로드 중...';
-
+        elements.submitExcelUploadBtn.textContent = '업로드 중...';
+        
         try {
             const response = await fetch('/api/upload', {
                 method: 'POST',
-                headers: getAuthHeader(),
                 body: formData
             });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
             const result = await response.json();
-
+            
             if (response.ok) {
-                showToast(result.message || '파일이 성공적으로 업로드되었습니다.');
+                showToast(result.message || '엑셀 파일이 성공적으로 동기화되었습니다.');
                 closeModal('uploadExcelModal');
                 fetchEmployees();
                 fetchStats();
             } else {
-                throw new Error(result.error || '파일 업로드에 실패했습니다.');
+                throw new Error(result.error || '엑셀 업로드 실패');
             }
         } catch (error) {
             showToast(error.message, 'error');
         } finally {
             elements.submitExcelUploadBtn.disabled = false;
-            elements.submitExcelUploadBtn.innerHTML = '파일 업로드';
+            elements.submitExcelUploadBtn.textContent = '파일 업로드';
         }
     });
 
@@ -318,16 +297,9 @@ function setupEventListeners() {
         try {
             const response = await fetch('/api/employees', {
                 method: 'POST',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, emp_no, join_date, email, phone })
             });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
             const result = await response.json();
             
             if (response.ok) {
@@ -375,16 +347,9 @@ function setupEventListeners() {
         try {
             const response = await fetch(`/api/employees/${id}`, {
                 method: 'PUT',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, join_date, retire_date, email, phone })
             });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
             const result = await response.json();
             
             if (response.ok) {
@@ -444,20 +409,13 @@ function setupEventListeners() {
         try {
             const response = await fetch('/api/attendance', {
                 method: 'POST',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     employee_id: state.selectedEmployee.id,
                     date: dateStr,
                     status: status
                 })
             });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
             const result = await response.json();
             
             if (response.ok) {
@@ -475,60 +433,6 @@ function setupEventListeners() {
             showToast(error.message, 'error');
         }
     });
-
-    // Login Submit Button Click
-    elements.loginSubmitBtn.addEventListener('click', executeLogin);
-
-    // Login Input Enter Key
-    elements.accessPasswordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            executeLogin();
-        }
-    });
-
-    async function executeLogin() {
-        const password = elements.accessPasswordInput.value.trim();
-        if (!password) {
-            showToast('비밀번호를 입력해주세요.', 'error');
-            return;
-        }
-
-        elements.loginSubmitBtn.disabled = true;
-        elements.loginSubmitBtn.textContent = '인증 중...';
-        elements.authErrorMsg.style.display = 'none';
-
-        try {
-            const response = await fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                sessionStorage.setItem('accessPassword', password);
-                elements.authOverlay.style.display = 'none';
-                showToast('인증에 성공했습니다.');
-                fetchEmployees();
-                fetchStats();
-            } else {
-                throw new Error(result.error || '인증에 실패했습니다.');
-            }
-        } catch (error) {
-            elements.authErrorMsg.textContent = error.message;
-            elements.authErrorMsg.style.display = 'block';
-            
-            // Add shake animation
-            const card = document.querySelector('.auth-card');
-            card.classList.add('shake');
-            setTimeout(() => {
-                card.classList.remove('shake');
-            }, 500);
-        } finally {
-            elements.loginSubmitBtn.disabled = false;
-            elements.loginSubmitBtn.textContent = '인증 및 접속';
-        }
-    }
 }
 
 // Switch view helper

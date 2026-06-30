@@ -7,824 +7,7 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap');
-
-:root {
-    --bg-color: #0f172a;
-    --panel-bg: rgba(30, 41, 59, 0.7);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-glow: rgba(59, 130, 246, 0.35);
-    
-    /* Attendance Colors */
-    --color-work: #10b981;       /* 출근 - Green */
-    --color-remote: #8b5cf6;     /* 재택 - Purple */
-    --color-leave: #f59e0b;      /* 연차 - Orange */
-    --color-half-leave: #eab308; /* 반차 - Yellow */
-    --color-absent: #ef4444;     /* 결근 - Red */
-    --color-off: #3b82f6;        /* 공가/교육 - Blue */
-    --color-late: #ec4899;       /* 지각 - Pink */
-    --color-weekend: #475569;    /* 휴일 - Slate */
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Outfit', 'Noto Sans KR', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    overflow: hidden;
-    background-image: 
-        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.3) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.2) 0px, transparent 50%);
-}
-
-/* Sidebar Styling */
-.sidebar {
-    width: 320px;
-    background: var(--panel-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-right: 1px solid var(--panel-border);
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    z-index: 10;
-}
-
-.sidebar-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--panel-border);
-}
-
-.logo {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.logo-sub {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 4px;
-    font-weight: 400;
-}
-
-.search-box {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--panel-border);
-}
-
-.search-input-wrapper {
-    position: relative;
-}
-
-.search-input {
-    width: 100%;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--panel-border);
-    padding: 10px 16px;
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.employee-list-wrapper {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-}
-
-.employee-list-wrapper::-webkit-scrollbar {
-    width: 6px;
-}
-
-.employee-list-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.employee-item {
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid transparent;
-}
-
-.employee-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.05);
-}
-
-.employee-item.active {
-    background: rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.4);
-}
-
-.emp-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.emp-name {
-    font-weight: 600;
-    font-size: 15px;
-}
-
-.emp-dept {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-.emp-no-badge {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-family: monospace;
-}
-
-.sidebar-footer {
-    padding: 16px;
-    border-top: 1px solid var(--panel-border);
-    display: flex;
-    gap: 8px;
-}
-
-.btn {
-    flex: 1;
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.btn:hover {
-    background: var(--accent-hover);
-    box-shadow: 0 0 12px var(--accent-glow);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-    border: 1px solid var(--panel-border);
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: none;
-}
-
-/* Main Content Area */
-.main-content {
-    flex: 1;
-    height: 100vh;
-    overflow-y: auto;
-    padding: 32px 40px;
-    display: flex;
-    flex-direction: column;
-}
-
-.main-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.main-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-/* Dashboard View */
-.dashboard-view {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-}
-
-.view-title {
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin-bottom: 4px;
-}
-
-.view-desc {
-    color: var(--text-secondary);
-    font-size: 14px;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.stat-card {
-    background: var(--panel-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--accent);
-}
-
-.stat-card.work::before { background: var(--color-work); }
-.stat-card.remote::before { background: var(--color-remote); }
-.stat-card.leave::before { background: var(--color-leave); }
-
-.stat-label {
-    font-size: 13px;
-    color: var(--text-secondary);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    margin-top: 10px;
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-}
-
-.stat-unit {
-    font-size: 14px;
-    color: var(--text-secondary);
-    font-weight: 400;
-}
-
-.chart-section {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 24px;
-}
-
-.chart-card {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 24px;
-}
-
-.chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.chart-title {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-/* Detail View */
-.detail-view {
-    display: none;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.employee-profile-card {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.profile-main {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.profile-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
-    color: white;
-}
-
-.profile-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.profile-name {
-    font-size: 22px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.profile-emp-no {
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.06);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-
-.profile-details {
-    display: flex;
-    gap: 24px;
-    margin-top: 8px;
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-.profile-detail-item strong {
-    color: var(--text-primary);
-}
-
-/* Calendar Grid Section */
-.calendar-card {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 16px;
-    padding: 24px;
-}
-
-.calendar-control {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.month-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.btn-arrow {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--panel-border);
-    color: var(--text-primary);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.btn-arrow:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.current-month-display {
-    font-size: 18px;
-    font-weight: 700;
-    min-width: 110px;
-    text-align: center;
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-}
-
-.calendar-day-header {
-    text-align: center;
-    font-weight: 600;
-    font-size: 12px;
-    color: var(--text-secondary);
-    padding: 10px 0;
-    border-bottom: 1px solid var(--panel-border);
-}
-
-.calendar-day-header:nth-child(7n) { color: #f87171; } /* Sun */
-.calendar-day-header:nth-child(7n-6) { color: #60a5fa; } /* Mon -> Let's keep Sunday as index 0 or 6. We will do standard Sunday-Saturday */
-
-.calendar-cell {
-    aspect-ratio: 1.2;
-    min-height: 85px;
-    background: rgba(15, 23, 42, 0.4);
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.calendar-cell:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.calendar-cell.other-month {
-    opacity: 0.25;
-    cursor: default;
-    pointer-events: none;
-}
-
-.day-number {
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.cell-status-chip {
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    display: inline-block;
-    align-self: stretch;
-    letter-spacing: -0.2px;
-}
-
-/* Color codes for Status Chips */
-.status-work { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-.status-remote { background-color: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
-.status-leave { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-.status-half-leave { background-color: rgba(234, 179, 8, 0.15); color: #fef08a; border: 1px solid rgba(234, 179, 8, 0.3); }
-.status-absent { background-color: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-.status-off { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-.status-late { background-color: rgba(236, 72, 153, 0.15); color: #fbcfe8; border: 1px solid rgba(236, 72, 153, 0.3); }
-.status-weekend { background-color: rgba(71, 85, 105, 0.1); color: #94a3b8; border: 1px solid rgba(71, 85, 105, 0.2); }
-
-/* Modals */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 100;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: #1e293b;
-    border: 1px solid var(--panel-border);
-    width: 100%;
-    max-width: 480px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    animation: modalShow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes modalShow {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--panel-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.form-group {
-    margin-bottom: 18px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-}
-
-.form-control {
-    width: 100%;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--panel-border);
-    padding: 10px 14px;
-    border-radius: 8px;
-    color: var(--text-primary);
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--panel-border);
-    background: rgba(15, 23, 42, 0.2);
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-/* Status selection grid in modal */
-.status-grid-select {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
-.status-select-btn {
-    padding: 12px 8px;
-    border-radius: 8px;
-    border: 1px solid var(--panel-border);
-    background: rgba(15, 23, 42, 0.4);
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.status-select-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.status-select-btn.active[data-status="출근"] { background: rgba(16, 185, 129, 0.2); border-color: var(--color-work); color: #34d399; }
-.status-select-btn.active[data-status="재택"] { background: rgba(139, 92, 246, 0.2); border-color: var(--color-remote); color: #a78bfa; }
-.status-select-btn.active[data-status="연차"] { background: rgba(245, 158, 11, 0.2); border-color: var(--color-leave); color: #fbbf24; }
-.status-select-btn.active[data-status="반차"] { background: rgba(234, 179, 8, 0.2); border-color: var(--color-half-leave); color: #fef08a; }
-.status-select-btn.active[data-status="결근"] { background: rgba(239, 68, 68, 0.2); border-color: var(--color-absent); color: #fca5a5; }
-.status-select-btn.active[data-status="지각"] { background: rgba(236, 72, 153, 0.2); border-color: var(--color-late); color: #fbcfe8; }
-.status-select-btn.active[data-status="공가"] { background: rgba(59, 130, 246, 0.2); border-color: var(--color-off); color: #60a5fa; }
-.status-select-btn.active[data-status="교육"] { background: rgba(59, 130, 246, 0.2); border-color: var(--color-off); color: #60a5fa; }
-.status-select-btn.active[data-status="/"] { background: rgba(71, 85, 105, 0.2); border-color: var(--color-weekend); color: #94a3b8; }
-
-/* Toast Notification */
-.toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #1e293b;
-    border: 1px solid var(--accent);
-    padding: 14px 24px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    z-index: 200;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.toast.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-/* Legend in Calendar */
-.calendar-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--panel-border);
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-}
-
-/* Mini Stats Widget Cards */
-.att-stat-mini-card {
-    background: var(--panel-bg);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s ease;
-}
-
-.att-stat-mini-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.att-stat-mini-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--accent);
-}
-
-/* Borders based on types */
-.att-stat-mini-card.work::before { background: var(--color-work); }
-.att-stat-mini-card.remote::before { background: var(--color-remote); }
-.att-stat-mini-card.leave::before { background: var(--color-leave); }
-.att-stat-mini-card.half-leave::before { background: var(--color-half-leave); }
-.att-stat-mini-card.absent::before { background: var(--color-absent); }
-.att-stat-mini-card.off::before { background: var(--color-off); }
-.att-stat-mini-card.late::before { background: var(--color-late); }
-.att-stat-mini-card.weekend::before { background: var(--color-weekend); }
-
-.att-stat-mini-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 4px;
-}
-
-.att-stat-mini-month {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.att-stat-mini-total {
-    font-size: 10px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
-
-/* Auth Screen Styling */
-.auth-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.4s ease;
-}
-
-.auth-card {
-    background: var(--panel-bg);
-    border: 1px solid var(--panel-border);
-    border-radius: 20px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.auth-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.auth-card h2 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.auth-card p {
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* Shake Animation on error */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-    20%, 40%, 60%, 80% { transform: translateX(8px); }
-}
-
-.auth-card.shake {
-    animation: shake 0.5s ease-in-out;
-}
-
-
-
-</style>
+    <link rel="stylesheet" href="/static/css/style.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -850,14 +33,14 @@ body {
             <!-- Dynamic employee list will be populated here -->
         </div>
         
-        <div class="sidebar-footer" style="gap: 6px;">
-            <button class="btn btn-secondary" id="syncExcelBtn" title="폴더 내 엑셀 동기화" style="padding: 10px 8px;">
+        <div class="sidebar-footer">
+            <button class="btn btn-secondary" id="syncExcelBtn" title="폴더 내 엑셀 동기화" style="padding: 10px 8px; font-size: 11px; flex: 1;">
                 <i class="fa-solid fa-sync"></i> 동기화
             </button>
-            <button class="btn btn-secondary" id="openUploadModalBtn" title="엑셀 파일 업로드" style="padding: 10px 8px;">
+            <button class="btn btn-secondary" id="openUploadModalBtn" title="엑셀 파일 업로드" style="padding: 10px 8px; font-size: 11px; flex: 1;">
                 <i class="fa-solid fa-upload"></i> 업로드
             </button>
-            <button class="btn" id="addEmployeeBtn" style="padding: 10px 8px;">
+            <button class="btn" id="addEmployeeBtn" style="padding: 10px 8px; font-size: 11px; flex: 1;">
                 <i class="fa-solid fa-user-plus"></i> 등록
             </button>
         </div>
@@ -901,27 +84,34 @@ body {
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
+                
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">금일 근무 비율</div>
                     </div>
-                    <div style="position: relative; height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div style="position: relative; height: 320px;">
                         <canvas id="ratioChart"></canvas>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- Employee Detail View (Hidden by default, shown on click) -->
+        
+        <!-- Detail View (Hidden by default) -->
         <section class="detail-view" id="detailView">
-            <!-- Profile Card -->
+            <div class="detail-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <button class="btn btn-secondary" id="backToDashboardBtn" style="flex: none; padding: 8px 16px;">
+                    <i class="fa-solid fa-arrow-left"></i> 대시보드로 돌아가기
+                </button>
+            </div>
+            
+            <!-- Employee Profile Card -->
             <div class="employee-profile-card">
                 <div class="profile-main">
                     <div class="profile-avatar" id="detailAvatar">김</div>
                     <div class="profile-meta">
                         <div class="profile-name">
                             <span id="detailName">김직원</span>
-                            <span class="profile-emp-no" id="detailEmpNo">2026010001</span>
+                            <span class="profile-emp-no" id="detailEmpNo">2026000000</span>
                         </div>
                         <div class="profile-details">
                             <div class="profile-detail-item">입사일: <strong id="detailJoinDate">-</strong></div>
@@ -933,93 +123,80 @@ body {
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-secondary" id="backToDashboardBtn">
-                        <i class="fa-solid fa-chart-simple"></i> 대시보드
-                    </button>
-                    <button class="btn" id="editEmployeeBtn">
-                        <i class="fa-solid fa-user-pen"></i> 정보 수정
-                    </button>
-                </div>
+                <button class="btn btn-secondary" id="editEmployeeBtn" style="flex: none; padding: 10px 18px;">
+                    <i class="fa-solid fa-user-gear"></i> 정보 수정
+                </button>
             </div>
             
-            <!-- Attendance Summary Stats Grid -->
-            <div class="attendance-stats-grid" id="attendanceStatsGrid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 4px;">
-                <!-- Dynamically generated stats card widgets -->
-            </div>
-
-            
-            <!-- Calendar Card -->
-            <div class="calendar-card">
-                <div class="calendar-control">
-                    <div class="month-selector">
-                        <button class="btn-arrow" id="prevMonthBtn"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="current-month-display" id="currentMonthDisplay">2026.06</div>
-                        <button class="btn-arrow" id="nextMonthBtn"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="calendar-layout">
+                <!-- Left: Quick stats grid -->
+                <div class="calendar-sidebar">
+                    <div style="margin-bottom: 16px;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary);">근태 항목 요약</h3>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">상태별 누적 횟수 현황</p>
                     </div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">
-                        * 날짜 칸을 클릭하여 근태 상태를 수정할 수 있습니다.
+                    <div class="attendance-stats-grid" id="attendanceStatsGrid">
+                        <!-- Mini cards will be populated here -->
                     </div>
                 </div>
                 
-                <div class="calendar-grid" id="calendarGrid">
-                    <!-- Dynamic calendar cells -->
-                </div>
-                
-                <div class="calendar-legend">
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-work);"></div>출근</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-remote);"></div>재택</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-leave);"></div>연차</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-half-leave);"></div>반차</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-absent);"></div>결근</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-late);"></div>지각</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-off);"></div>공가/교육</div>
-                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-weekend);"></div>휴일 (/)</div>
+                <!-- Right: Calendar grid -->
+                <div class="calendar-card">
+                    <div class="calendar-header">
+                        <h2 class="calendar-title" id="currentMonthDisplay">2026.06</h2>
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" id="prevMonthBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="calendar-nav-btn" id="nextMonthBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar headers and cells -->
+                    </div>
                 </div>
             </div>
         </section>
-
+        
     </main>
 
-    <!-- Modal: Add New Employee -->
+    <!-- Modal: Add Employee -->
     <div class="modal-overlay" id="addEmployeeModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">신규 직원 등록</div>
+                <div class="modal-title">새 직원 등록</div>
                 <button class="modal-close" onclick="closeModal('addEmployeeModal')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="addEmployeeForm">
                     <div class="form-group">
                         <label for="newEmpName">성명 *</label>
-                        <input type="text" id="newEmpName" class="form-control" placeholder="이름을 입력하세요" required>
+                        <input type="text" id="newEmpName" class="form-control" placeholder="성명 입력" required>
                     </div>
                     <div class="form-group">
                         <label for="newEmpNo">사번 *</label>
-                        <input type="text" id="newEmpNo" class="form-control" placeholder="사번을 입력하세요 (예: 2024030563)" required>
+                        <input type="text" id="newEmpNo" class="form-control" placeholder="사번 입력" required>
                     </div>
                     <div class="form-group">
                         <label for="newJoinDate">입사일</label>
                         <input type="date" id="newJoinDate" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="newEmail">이메일</label>
-                        <input type="email" id="newEmail" class="form-control" placeholder="email@meta-m.co.kr">
+                        <label for="newEmail">이메일 주소</label>
+                        <input type="email" id="newEmail" class="form-control" placeholder="example@company.com">
                     </div>
                     <div class="form-group">
-                        <label for="newPhone">전화번호</label>
-                        <input type="text" id="newPhone" class="form-control" placeholder="010-XXXX-XXXX">
+                        <label for="newPhone">연락처</label>
+                        <input type="text" id="newPhone" class="form-control" placeholder="010-0000-0000">
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('addEmployeeModal')">취소</button>
-                <button class="btn" id="saveNewEmployeeBtn">등록</button>
+                <button class="btn" id="saveNewEmployeeBtn">등록 및 저장</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Edit Employee Info -->
+    <!-- Modal: Edit Employee -->
     <div class="modal-overlay" id="editEmployeeModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1031,11 +208,11 @@ body {
                     <input type="hidden" id="editEmpId">
                     <div class="form-group">
                         <label for="editEmpName">성명 *</label>
-                        <input type="text" id="editEmpName" class="form-control" required>
+                        <input type="text" id="editEmpName" class="form-control" placeholder="성명 입력" required>
                     </div>
                     <div class="form-group">
                         <label for="editEmpNo">사번 (수정 불가)</label>
-                        <input type="text" id="editEmpNo" class="form-control" readonly style="opacity: 0.6;">
+                        <input type="text" id="editEmpNo" class="form-control" readonly style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary);">
                     </div>
                     <div class="form-group">
                         <label for="editJoinDate">입사일</label>
@@ -1046,12 +223,12 @@ body {
                         <input type="date" id="editRetireDate" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label for="editEmail">이메일</label>
-                        <input type="email" id="editEmail" class="form-control">
+                        <label for="editEmail">이메일 주소</label>
+                        <input type="email" id="editEmail" class="form-control" placeholder="example@company.com">
                     </div>
                     <div class="form-group">
-                        <label for="editPhone">전화번호</label>
-                        <input type="text" id="editPhone" class="form-control">
+                        <label for="editPhone">연락처</label>
+                        <input type="text" id="editPhone" class="form-control" placeholder="010-0000-0000">
                     </div>
                 </form>
             </div>
@@ -1064,7 +241,7 @@ body {
 
     <!-- Modal: Edit Attendance Status -->
     <div class="modal-overlay" id="editAttendanceModal">
-        <div class="modal-content" style="max-width: 380px;">
+        <div class="modal-content" style="max-width: 420px;">
             <div class="modal-header">
                 <div class="modal-title">근태 상태 변경</div>
                 <button class="modal-close" onclick="closeModal('editAttendanceModal')">&times;</button>
@@ -1090,11 +267,12 @@ body {
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('editAttendanceModal')">닫기</button>
             </div>
+        </div>
     </div>
 
     <!-- Modal: Upload Excel File -->
     <div class="modal-overlay" id="uploadExcelModal">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-title">근태 엑셀 파일 업로드</div>
                 <button class="modal-close" onclick="closeModal('uploadExcelModal')">&times;</button>
@@ -1116,7 +294,6 @@ body {
             </div>
         </div>
     </div>
-
 
     <!-- Toast message notification -->
     <div class="toast" id="toastMessage">알림 메시지</div>
@@ -1141,891 +318,7 @@ body {
         </div>
     </div>
 
-
     <!-- Custom JS -->
-    <script>
-// Global Application State
-const state = {
-    employees: [],
-    selectedEmployee: null,
-    currentView: 'dashboard', // 'dashboard' or 'detail'
-    currentYear: new Date().getFullYear(),
-    currentMonth: new Date().getMonth() + 1,
-    attendanceData: {}, // Map of date -> status for selected employee
-    trendChart: null,
-    ratioChart: null,
-    totalStats: {},
-    monthStats: {}
-};
-
-// DOM Elements
-const elements = {
-    employeeList: document.getElementById('employeeList'),
-    employeeSearchInput: document.getElementById('employeeSearchInput'),
-    syncExcelBtn: document.getElementById('syncExcelBtn'),
-    addEmployeeBtn: document.getElementById('addEmployeeBtn'),
-    dashboardView: document.getElementById('dashboardView'),
-    detailView: document.getElementById('detailView'),
-    backToDashboardBtn: document.getElementById('backToDashboardBtn'),
-    
-    // Stats elements
-    statsDateText: document.getElementById('statsDateText'),
-    statTotalEmployees: document.getElementById('statTotalEmployees'),
-    statTodayWork: document.getElementById('statTodayWork'),
-    statTodayRemote: document.getElementById('statTodayRemote'),
-    statTodayLeave: document.getElementById('statTodayLeave'),
-    
-    // Profile elements
-    detailAvatar: document.getElementById('detailAvatar'),
-    detailName: document.getElementById('detailName'),
-    detailEmpNo: document.getElementById('detailEmpNo'),
-    detailJoinDate: document.getElementById('detailJoinDate'),
-    detailRetireDate: document.getElementById('detailRetireDate'),
-    retireDateContainer: document.getElementById('retireDateContainer'),
-    detailEmail: document.getElementById('detailEmail'),
-    detailPhone: document.getElementById('detailPhone'),
-    attendanceStatsGrid: document.getElementById('attendanceStatsGrid'),
-    detailTotalLates: document.getElementById('detailTotalLates'),
-    detailMonthLates: document.getElementById('detailMonthLates'),
-    openUploadModalBtn: document.getElementById('openUploadModalBtn'),
-    uploadExcelModal: document.getElementById('uploadExcelModal'),
-    excelFileInput: document.getElementById('excelFileInput'),
-    submitExcelUploadBtn: document.getElementById('submitExcelUploadBtn'),
-    editEmployeeBtn: document.getElementById('editEmployeeBtn'),
-    
-    // Calendar elements
-    calendarGrid: document.getElementById('calendarGrid'),
-    currentMonthDisplay: document.getElementById('currentMonthDisplay'),
-    prevMonthBtn: document.getElementById('prevMonthBtn'),
-    nextMonthBtn: document.getElementById('nextMonthBtn'),
-    
-    // Add Employee Modal
-    addEmployeeModal: document.getElementById('addEmployeeModal'),
-    saveNewEmployeeBtn: document.getElementById('saveNewEmployeeBtn'),
-    addEmployeeForm: document.getElementById('addEmployeeForm'),
-    
-    // Edit Employee Modal
-    editEmployeeModal: document.getElementById('editEmployeeModal'),
-    saveEditEmployeeBtn: document.getElementById('saveEditEmployeeBtn'),
-    editEmployeeForm: document.getElementById('editEmployeeForm'),
-    
-    // Attendance Modal
-    editAttendanceModal: document.getElementById('editAttendanceModal'),
-    attModalDate: document.getElementById('attModalDate'),
-    attModalName: document.getElementById('attModalName'),
-    statusSelectGrid: document.getElementById('statusSelectGrid'),
-    
-    // Auth elements
-    authOverlay: document.getElementById('authOverlay'),
-    accessPasswordInput: document.getElementById('accessPasswordInput'),
-    loginSubmitBtn: document.getElementById('loginSubmitBtn'),
-    authErrorMsg: document.getElementById('authErrorMsg'),
-    
-    // Toast
-    toastMessage: document.getElementById('toastMessage')
-};
-
-// Init Application
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        setupEventListeners();
-        checkExistingAuth();
-    } catch (e) {
-        alert("근태관리 시스템 초기화 에러:\n" + e.message + "\n" + e.stack);
-    }
-});
-
-// Authentication Helpers
-function getAuthHeader() {
-    return {
-        'X-Access-Password': sessionStorage.getItem('accessPassword') || ''
-    };
-}
-
-async function checkExistingAuth() {
-    const password = sessionStorage.getItem('accessPassword');
-    if (!password) {
-        elements.authOverlay.style.display = 'flex';
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/auth', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        if (response.ok) {
-            elements.authOverlay.style.display = 'none';
-            fetchEmployees();
-            fetchStats();
-        } else {
-            sessionStorage.removeItem('accessPassword');
-            elements.authOverlay.style.display = 'flex';
-        }
-    } catch (error) {
-        sessionStorage.removeItem('accessPassword');
-        elements.authOverlay.style.display = 'flex';
-    }
-}
-
-// Toast notification helper
-function showToast(message, type = 'success') {
-    elements.toastMessage.textContent = message;
-    if (type === 'error') {
-        elements.toastMessage.style.borderColor = '#ef4444';
-    } else {
-        elements.toastMessage.style.borderColor = 'var(--accent)';
-    }
-    elements.toastMessage.classList.add('show');
-    setTimeout(() => {
-        elements.toastMessage.classList.remove('show');
-    }, 3000);
-}
-
-// Modal open/close helpers
-window.openModal = function(modalId) {
-    document.getElementById(modalId).style.display = 'flex';
-};
-
-window.closeModal = function(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-};
-
-// API Calls
-async function fetchEmployees(searchQuery = '') {
-    try {
-        const response = await fetch(`/api/employees?q=${encodeURIComponent(searchQuery)}`, {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
-        if (!response.ok) throw new Error('직원 정보를 불러오지 못했습니다.');
-        state.employees = await response.json();
-        renderEmployeeList();
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
-
-async function fetchStats() {
-    try {
-        const response = await fetch('/api/stats', {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
-        if (!response.ok) throw new Error('통계 데이터를 불러오지 못했습니다.');
-        const stats = await response.json();
-        renderDashboard(stats);
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
-
-async function fetchEmployeeAttendance(employeeId, year, month) {
-    try {
-        const response = await fetch(`/api/employees/${employeeId}/attendance?year=${year}&month=${month}`, {
-            headers: getAuthHeader()
-        });
-        if (response.status === 401) {
-            checkExistingAuth();
-            return;
-        }
-        if (!response.ok) throw new Error('근태 정보를 불러오지 못했습니다.');
-        const data = await response.json();
-        
-        state.selectedEmployee = data.employee;
-        state.attendanceData = {};
-        state.totalStats = data.total_stats || {};
-        state.monthStats = data.month_stats || {};
-        
-        // Map attendance list into an object of date -> status
-        data.attendance.forEach(att => {
-            state.attendanceData[att.date] = att.status;
-        });
-        
-        renderEmployeeProfile();
-        renderCalendar();
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-}
-
-// Setup Event Listeners
-function setupEventListeners() {
-    // Search input typing
-    elements.employeeSearchInput.addEventListener('input', (e) => {
-        fetchEmployees(e.target.value);
-    });
-
-    // Excel Sync button
-    elements.syncExcelBtn.addEventListener('click', async () => {
-        elements.syncExcelBtn.disabled = true;
-        elements.syncExcelBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 동기화 중...';
-        
-        try {
-            const response = await fetch('/api/sync', { 
-                method: 'POST',
-                headers: getAuthHeader()
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
-            const result = await response.json();
-            if (response.ok) {
-                showToast(result.message || '성공적으로 동기화되었습니다.');
-                fetchEmployees();
-                fetchStats();
-            } else {
-                throw new Error(result.error || '동기화 중 오류가 발생했습니다.');
-            }
-        } catch (error) {
-            showToast(error.message, 'error');
-        } finally {
-            elements.syncExcelBtn.disabled = false;
-            elements.syncExcelBtn.innerHTML = '<i class="fa-solid fa-sync"></i> 동기화';
-        }
-    });
-
-    // Open Upload Modal
-    elements.openUploadModalBtn.addEventListener('click', () => {
-        document.getElementById('uploadExcelForm').reset();
-        openModal('uploadExcelModal');
-    });
-
-    // Submit Excel Upload
-    elements.submitExcelUploadBtn.addEventListener('click', async () => {
-        const fileInput = elements.excelFileInput;
-        if (fileInput.files.length === 0) {
-            showToast('업로드할 엑셀 파일을 선택해주세요.', 'error');
-            return;
-        }
-
-        const file = fileInput.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-
-        elements.submitExcelUploadBtn.disabled = true;
-        elements.submitExcelUploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 업로드 중...';
-
-        try {
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                headers: getAuthHeader(),
-                body: formData
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast(result.message || '파일이 성공적으로 업로드되었습니다.');
-                closeModal('uploadExcelModal');
-                fetchEmployees();
-                fetchStats();
-            } else {
-                throw new Error(result.error || '파일 업로드에 실패했습니다.');
-            }
-        } catch (error) {
-            showToast(error.message, 'error');
-        } finally {
-            elements.submitExcelUploadBtn.disabled = false;
-            elements.submitExcelUploadBtn.innerHTML = '파일 업로드';
-        }
-    });
-
-    // Add Employee Button
-    elements.addEmployeeBtn.addEventListener('click', () => {
-        elements.addEmployeeForm.reset();
-        openModal('addEmployeeModal');
-    });
-
-    // Save New Employee
-    elements.saveNewEmployeeBtn.addEventListener('click', async () => {
-        const name = document.getElementById('newEmpName').value.trim();
-        const emp_no = document.getElementById('newEmpNo').value.trim();
-        const join_date = document.getElementById('newJoinDate').value;
-        const email = document.getElementById('newEmail').value.trim();
-        const phone = document.getElementById('newPhone').value.trim();
-
-        if (!name || !emp_no) {
-            showToast('성명과 사번은 필수 입력 사항입니다.', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/employees', {
-                method: 'POST',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, emp_no, join_date, email, phone })
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
-            const result = await response.json();
-            
-            if (response.ok) {
-                showToast('새 직원이 등록되었습니다.');
-                closeModal('addEmployeeModal');
-                fetchEmployees();
-                fetchStats();
-            } else {
-                throw new Error(result.error || '직원 등록에 실패했습니다.');
-            }
-        } catch (error) {
-            showToast(error.message, 'error');
-        }
-    });
-
-    // Edit Employee Profile Button
-    elements.editEmployeeBtn.addEventListener('click', () => {
-        if (!state.selectedEmployee) return;
-        
-        document.getElementById('editEmpId').value = state.selectedEmployee.id;
-        document.getElementById('editEmpName').value = state.selectedEmployee.name;
-        document.getElementById('editEmpNo').value = state.selectedEmployee.emp_no;
-        document.getElementById('editJoinDate').value = state.selectedEmployee.join_date || '';
-        document.getElementById('editRetireDate').value = state.selectedEmployee.retire_date || '';
-        document.getElementById('editEmail').value = state.selectedEmployee.email || '';
-        document.getElementById('editPhone').value = state.selectedEmployee.phone || '';
-        
-        openModal('editEmployeeModal');
-    });
-
-    // Save Edited Profile
-    elements.saveEditEmployeeBtn.addEventListener('click', async () => {
-        const id = document.getElementById('editEmpId').value;
-        const name = document.getElementById('editEmpName').value.trim();
-        const join_date = document.getElementById('editJoinDate').value;
-        const retire_date = document.getElementById('editRetireDate').value;
-        const email = document.getElementById('editEmail').value.trim();
-        const phone = document.getElementById('editPhone').value.trim();
-
-        if (!name) {
-            showToast('성명은 필수 입력 사항입니다.', 'error');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/employees/${id}`, {
-                method: 'PUT',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, join_date, retire_date, email, phone })
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
-            const result = await response.json();
-            
-            if (response.ok) {
-                showToast('직원 정보가 수정되었습니다.');
-                closeModal('editEmployeeModal');
-                state.selectedEmployee = result;
-                fetchEmployees();
-                renderEmployeeProfile();
-            } else {
-                throw new Error(result.error || '정보 수정에 실패했습니다.');
-            }
-        } catch (error) {
-            showToast(error.message, 'error');
-        }
-    });
-
-    // Back to Dashboard Button
-    elements.backToDashboardBtn.addEventListener('click', () => {
-        switchView('dashboard');
-        // Deselect active list item
-        const activeItem = document.querySelector('.employee-item.active');
-        if (activeItem) activeItem.classList.remove('active');
-        state.selectedEmployee = null;
-    });
-
-    // Month Selector Buttons
-    elements.prevMonthBtn.addEventListener('click', () => {
-        state.currentMonth--;
-        if (state.currentMonth < 1) {
-            state.currentMonth = 12;
-            state.currentYear--;
-        }
-        if (state.selectedEmployee) {
-            fetchEmployeeAttendance(state.selectedEmployee.id, state.currentYear, state.currentMonth);
-        }
-    });
-
-    elements.nextMonthBtn.addEventListener('click', () => {
-        state.currentMonth++;
-        if (state.currentMonth > 12) {
-            state.currentMonth = 1;
-            state.currentYear++;
-        }
-        if (state.selectedEmployee) {
-            fetchEmployeeAttendance(state.selectedEmployee.id, state.currentYear, state.currentMonth);
-        }
-    });
-
-    // Attendance Status Modification Modal Buttons click
-    elements.statusSelectGrid.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.status-select-btn');
-        if (!btn) return;
-        
-        const dateStr = elements.attModalDate.textContent;
-        const status = btn.getAttribute('data-status');
-        
-        try {
-            const response = await fetch('/api/attendance', {
-                method: 'POST',
-                headers: {
-                    ...getAuthHeader(),
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    employee_id: state.selectedEmployee.id,
-                    date: dateStr,
-                    status: status
-                })
-            });
-            if (response.status === 401) {
-                checkExistingAuth();
-                return;
-            }
-            const result = await response.json();
-            
-            if (response.ok) {
-                showToast(`${dateStr} 근태를 [${status}]로 변경했습니다.`);
-                closeModal('editAttendanceModal');
-                
-                // Refresh local attendance state
-                state.attendanceData[dateStr] = status;
-                fetchEmployeeAttendance(state.selectedEmployee.id, state.currentYear, state.currentMonth);
-                fetchStats(); // Update dashboard stats in background
-            } else {
-                throw new Error(result.error || '근태 수정에 실패했습니다.');
-            }
-        } catch (error) {
-            showToast(error.message, 'error');
-        }
-    });
-
-    // Login Submit Button Click
-    elements.loginSubmitBtn.addEventListener('click', executeLogin);
-
-    // Login Input Enter Key
-    elements.accessPasswordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            executeLogin();
-        }
-    });
-
-    async function executeLogin() {
-        const password = elements.accessPasswordInput.value.trim();
-        if (!password) {
-            showToast('비밀번호를 입력해주세요.', 'error');
-            return;
-        }
-
-        elements.loginSubmitBtn.disabled = true;
-        elements.loginSubmitBtn.textContent = '인증 중...';
-        elements.authErrorMsg.style.display = 'none';
-
-        try {
-            const response = await fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                sessionStorage.setItem('accessPassword', password);
-                elements.authOverlay.style.display = 'none';
-                showToast('인증에 성공했습니다.');
-                fetchEmployees();
-                fetchStats();
-            } else {
-                throw new Error(result.error || '인증에 실패했습니다.');
-            }
-        } catch (error) {
-            elements.authErrorMsg.textContent = error.message;
-            elements.authErrorMsg.style.display = 'block';
-            
-            // Add shake animation
-            const card = document.querySelector('.auth-card');
-            card.classList.add('shake');
-            setTimeout(() => {
-                card.classList.remove('shake');
-            }, 500);
-        } finally {
-            elements.loginSubmitBtn.disabled = false;
-            elements.loginSubmitBtn.textContent = '인증 및 접속';
-        }
-    }
-}
-
-// Switch view helper
-function switchView(viewName) {
-    state.currentView = viewName;
-    if (viewName === 'dashboard') {
-        elements.dashboardView.style.display = 'flex';
-        elements.detailView.style.display = 'none';
-        fetchStats();
-    } else {
-        elements.dashboardView.style.display = 'none';
-        elements.detailView.style.display = 'flex';
-    }
-}
-
-// Renders
-function renderEmployeeList() {
-    elements.employeeList.innerHTML = '';
-    
-    if (state.employees.length === 0) {
-        elements.employeeList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:13px;">검색 결과가 없습니다.</div>';
-        return;
-    }
-    
-    state.employees.forEach(emp => {
-        const item = document.createElement('div');
-        item.className = 'employee-item';
-        if (state.selectedEmployee && state.selectedEmployee.id === emp.id) {
-            item.classList.add('active');
-        }
-        
-        item.innerHTML = `
-            <div class="emp-info">
-                <span class="emp-name">${emp.name}</span>
-                <span class="emp-dept">${emp.retire_date ? '퇴사자' : '정상근무'}</span>
-            </div>
-            <span class="emp-no-badge">${emp.emp_no}</span>
-        `;
-        
-        item.addEventListener('click', () => {
-            // Update active state in UI
-            document.querySelectorAll('.employee-item').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Switch to details
-            switchView('detail');
-            fetchEmployeeAttendance(emp.id, state.currentYear, state.currentMonth);
-        });
-        
-        elements.employeeList.appendChild(item);
-    });
-}
-
-function renderDashboard(data) {
-    // Stats Date Display
-    const dateObj = new Date(data.stats_date);
-    elements.statsDateText.innerHTML = `기준 일자: <strong>${data.stats_date}</strong> (기록된 가장 최근 근태일)`;
-    
-    elements.statTotalEmployees.innerHTML = `${data.total_employees} <span class="stat-unit">명</span>`;
-    
-    // Set counts
-    const today = data.today_stats;
-    const workCount = (today["출근"] || 0) + (today["지각"] || 0);
-    const remoteCount = today["재택"] || 0;
-    const leaveCount = (today["연차"] || 0) + (today["반차"] || 0) + (today["공가"] || 0) + (today["교육"] || 0);
-    
-    elements.statTodayWork.innerHTML = `${workCount} <span class="stat-unit">명</span>`;
-    elements.statTodayRemote.innerHTML = `${remoteCount} <span class="stat-unit">명</span>`;
-    elements.statTodayLeave.innerHTML = `${leaveCount} <span class="stat-unit">명</span>`;
-    
-    // 1. Render ratio chart (Doughnut)
-    const ratioCtx = document.getElementById('ratioChart').getContext('2d');
-    
-    if (state.ratioChart) state.ratioChart.destroy();
-    
-    // Gather all statuses present today
-    const labels = Object.keys(today).filter(k => k !== '/');
-    const values = labels.map(k => today[k]);
-    
-    // Palette
-    const colors = {
-        "출근": "#10b981",
-        "재택": "#8b5cf6",
-        "연차": "#f59e0b",
-        "반차": "#eab308",
-        "결근": "#ef4444",
-        "공가": "#3b82f6",
-        "교육": "#3b82f6",
-        "지각": "#ec4899"
-    };
-    
-    const backgroundColors = labels.map(label => colors[label] || '#94a3b8');
-    
-    if (labels.length === 0) {
-        state.ratioChart = new Chart(ratioCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['데이터 없음'],
-                datasets: [{
-                    data: [1],
-                    backgroundColor: ['rgba(255,255,255,0.05)'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    } else {
-        state.ratioChart = new Chart(ratioCtx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255,255,255,0.08)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: '#f8fafc',
-                            font: { family: 'Outfit' }
-                        }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-    }
-    
-    // 2. Render monthly trend chart (Bar/Line)
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    if (state.trendChart) state.trendChart.destroy();
-    
-    // Sort months
-    const months = Object.keys(data.monthly_trends).sort();
-    const workData = [];
-    const remoteData = [];
-    const leaveData = [];
-    
-    months.forEach(m => {
-        const monthStats = data.monthly_trends[m];
-        const work = (monthStats["출근"] || 0) + (monthStats["지각"] || 0);
-        const remote = monthStats["재택"] || 0;
-        const leave = (monthStats["연차"] || 0) + (monthStats["반차"] || 0) + (monthStats["공가"] || 0) + (monthStats["교육"] || 0);
-        
-        workData.push(work);
-        remoteData.push(remote);
-        leaveData.push(leave);
-    });
-    
-    state.trendChart = new Chart(trendCtx, {
-        type: 'bar',
-        data: {
-            labels: months.map(m => m.replace('-', '년 ') + '월'),
-            datasets: [
-                {
-                    label: '출근',
-                    data: workData,
-                    backgroundColor: 'rgba(16, 185, 129, 0.65)',
-                    borderColor: '#10b981',
-                    borderWidth: 1,
-                    borderRadius: 4
-                },
-                {
-                    label: '재택',
-                    data: remoteData,
-                    backgroundColor: 'rgba(139, 92, 246, 0.65)',
-                    borderColor: '#8b5cf6',
-                    borderWidth: 1,
-                    borderRadius: 4
-                },
-                {
-                    label: '휴가/기타',
-                    data: leaveData,
-                    backgroundColor: 'rgba(245, 158, 11, 0.65)',
-                    borderColor: '#f59e0b',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
-                },
-                y: {
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: '#94a3b8' }
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#f8fafc',
-                        font: { family: 'Outfit' }
-                    }
-                }
-            }
-        }
-    });
-}
-
-function renderEmployeeProfile() {
-    const emp = state.selectedEmployee;
-    if (!emp) return;
-    
-    elements.detailAvatar.textContent = emp.name.charAt(0);
-    elements.detailName.textContent = emp.name;
-    elements.detailEmpNo.textContent = emp.emp_no;
-    elements.detailJoinDate.textContent = emp.join_date || '-';
-    
-    if (emp.retire_date) {
-        elements.detailRetireDate.textContent = emp.retire_date;
-        elements.retireDateContainer.style.display = 'block';
-    } else {
-        elements.retireDateContainer.style.display = 'none';
-    }
-    
-    elements.detailEmail.textContent = emp.email || '-';
-    elements.detailPhone.textContent = emp.phone || '-';
-    
-    // Render Quick Stats Cards Grid
-    elements.attendanceStatsGrid.innerHTML = '';
-    const categories = [
-        { name: "출근", class: "work" },
-        { name: "재택", class: "remote" },
-        { name: "연차", class: "leave" },
-        { name: "반차", class: "half-leave" },
-        { name: "지각", class: "late" },
-        { name: "결근", class: "absent" },
-        { name: "공가", class: "off" },
-        { name: "교육", class: "off" }
-    ];
-    
-    categories.forEach(cat => {
-        const totalVal = state.totalStats[cat.name] || 0;
-        const monthVal = state.monthStats[cat.name] || 0;
-        
-        const card = document.createElement('div');
-        card.className = `att-stat-mini-card ${cat.class}`;
-        card.innerHTML = `
-            <div class="att-stat-mini-label">${cat.name}</div>
-            <div class="att-stat-mini-month">${monthVal}<span style="font-size:10px; font-weight:normal; margin-left:1px;">회</span></div>
-            <div class="att-stat-mini-total">총 ${totalVal}회</div>
-        `;
-        elements.attendanceStatsGrid.appendChild(card);
-    });
-    
-    // Render late stats in profile details
-    elements.detailTotalLates.textContent = state.totalStats["지각"] || 0;
-    elements.detailMonthLates.textContent = state.monthStats["지각"] || 0;
-}
-
-function renderCalendar() {
-    elements.currentMonthDisplay.textContent = `${state.currentYear}.${String(state.currentMonth).padStart(2, '0')}`;
-    
-    // Clear grid
-    elements.calendarGrid.innerHTML = '';
-    
-    // Add Day headers: Sun Mon Tue Wed Thu Fri Sat
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-    weekdays.forEach(day => {
-        const header = document.createElement('div');
-        header.className = 'calendar-day-header';
-        header.textContent = day;
-        elements.calendarGrid.appendChild(header);
-    });
-    
-    // Get calendar math
-    const firstDay = new Date(state.currentYear, state.currentMonth - 1, 1);
-    const lastDay = new Date(state.currentYear, state.currentMonth, 0);
-    
-    const startingDayOfWeek = firstDay.getDay();
-    const totalDays = lastDay.getDate();
-    
-    // Previous month padding
-    const prevMonthLastDay = new Date(state.currentYear, state.currentMonth - 1, 0).getDate();
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-        const cell = document.createElement('div');
-        cell.className = 'calendar-cell other-month';
-        cell.innerHTML = `<span class="day-number">${prevMonthLastDay - i}</span>`;
-        elements.calendarGrid.appendChild(cell);
-    }
-    
-    // Days in current month
-    for (let day = 1; day <= totalDays; day++) {
-        const cell = document.createElement('div');
-        cell.className = 'calendar-cell';
-        
-        const dateStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const currentDayOfWeek = new Date(state.currentYear, state.currentMonth - 1, day).getDay();
-        const isWeekend = (currentDayOfWeek === 0 || currentDayOfWeek === 6);
-        
-        let status = state.attendanceData[dateStr];
-        if (!status && isWeekend) {
-            status = '/';
-        }
-        
-        let statusClass = '';
-        let displayStatus = status || '';
-        
-        if (status === '출근') statusClass = 'status-work';
-        else if (status === '재택') statusClass = 'status-remote';
-        else if (status === '연차') statusClass = 'status-leave';
-        else if (status === '반차') statusClass = 'status-half-leave';
-        else if (status === '결근') statusClass = 'status-absent';
-        else if (status === '지각') statusClass = 'status-late';
-        else if (status === '공가' || status === '교육') statusClass = 'status-off';
-        else if (status === '/') {
-            statusClass = 'status-weekend';
-            displayStatus = '휴일';
-        }
-        
-        cell.innerHTML = `
-            <span class="day-number" style="${currentDayOfWeek === 0 ? 'color:#f87171;' : currentDayOfWeek === 6 ? 'color:#60a5fa;' : ''}">${day}</span>
-            ${status ? `<span class="cell-status-chip ${statusClass}">${displayStatus}</span>` : ''}
-        `;
-        
-        cell.addEventListener('click', () => {
-            elements.attModalDate.textContent = dateStr;
-            elements.attModalName.textContent = `[${state.selectedEmployee.name}] 직원의 근태 상태를 선택하세요.`;
-            
-            const btns = elements.statusSelectGrid.querySelectorAll('.status-select-btn');
-            btns.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-status') === (status || '')) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            openModal('editAttendanceModal');
-        });
-        
-        elements.calendarGrid.appendChild(cell);
-    }
-}
-
-</script>
+    <script src="/static/js/main.js"></script>
 </body>
 </html>
