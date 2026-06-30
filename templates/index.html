@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직원 근태 관리 시스템 - GOC2</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css?v=1.1">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fa-solid fa-calendar-check"></i>
+                GOC2 근태관리
+            </div>
+            <div class="logo-sub">전략게임사업부문 게임서비스본부</div>
+        </div>
+        
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <input type="text" id="employeeSearchInput" class="search-input" placeholder="직원 검색 (이름, 사번)...">
+            </div>
+        </div>
+        
+        <div class="employee-list-wrapper" id="employeeList">
+            <!-- Dynamic employee list will be populated here -->
+        </div>
+        
+        <div class="sidebar-footer" style="gap: 6px;">
+            <button class="btn btn-secondary" id="syncExcelBtn" title="폴더 내 엑셀 동기화" style="padding: 10px 8px;">
+                <i class="fa-solid fa-sync"></i> 동기화
+            </button>
+            <button class="btn btn-secondary" id="openUploadModalBtn" title="엑셀 파일 업로드" style="padding: 10px 8px;">
+                <i class="fa-solid fa-upload"></i> 업로드
+            </button>
+            <button class="btn" id="addEmployeeBtn" style="padding: 10px 8px;">
+                <i class="fa-solid fa-user-plus"></i> 등록
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Dashboard View (Shown by default) -->
+        <section class="dashboard-view" id="dashboardView">
+            <div>
+                <h1 class="view-title">GOC2 근태 대시보드</h1>
+                <p class="view-desc" id="statsDateText">금일 근태 현황 및 실시간 통계</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">활성 직원수</div>
+                    <div class="stat-value" id="statTotalEmployees">0 <span class="stat-unit">명</span></div>
+                </div>
+                <div class="stat-card work">
+                    <div class="stat-label">오늘 출근</div>
+                    <div class="stat-value" id="statTodayWork">0 <span class="stat-unit">명</span></div>
+                </div>
+                <div class="stat-card remote">
+                    <div class="stat-label">오늘 재택</div>
+                    <div class="stat-value" id="statTodayRemote">0 <span class="stat-unit">명</span></div>
+                </div>
+                <div class="stat-card leave">
+                    <div class="stat-label">오늘 휴가</div>
+                    <div class="stat-value" id="statTodayLeave">0 <span class="stat-unit">명</span></div>
+                </div>
+            </div>
+            
+            <div class="chart-section">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">월별 출근 및 재택근무 추이</div>
+                    </div>
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">금일 근무 비율</div>
+                    </div>
+                    <div style="position: relative; height: 320px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="ratioChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Employee Detail View (Hidden by default, shown on click) -->
+        <section class="detail-view" id="detailView">
+            <!-- Profile Card -->
+            <div class="employee-profile-card">
+                <div class="profile-main">
+                    <div class="profile-avatar" id="detailAvatar">김</div>
+                    <div class="profile-meta">
+                        <div class="profile-name">
+                            <span id="detailName">김직원</span>
+                            <span class="profile-emp-no" id="detailEmpNo">2026010001</span>
+                        </div>
+                        <div class="profile-details">
+                            <div class="profile-detail-item">입사일: <strong id="detailJoinDate">-</strong></div>
+                            <div class="profile-detail-item" id="retireDateContainer" style="display:none;">퇴사일: <strong id="detailRetireDate">-</strong></div>
+                            <div class="profile-detail-item">이메일: <strong id="detailEmail">-</strong></div>
+                            <div class="profile-detail-item">연락처: <strong id="detailPhone">-</strong></div>
+                            <div class="profile-detail-item" style="color: #ec4899; font-weight: 500; background: rgba(236, 72, 153, 0.1); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(236, 72, 153, 0.2);">총 지각: <strong id="detailTotalLates" style="color: #fbcfe8;">0</strong>회</div>
+                            <div class="profile-detail-item" style="background: rgba(255, 255, 255, 0.04); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.06);">이달 지각: <strong id="detailMonthLates">0</strong>회</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" id="backToDashboardBtn">
+                        <i class="fa-solid fa-chart-simple"></i> 대시보드
+                    </button>
+                    <button class="btn" id="editEmployeeBtn">
+                        <i class="fa-solid fa-user-pen"></i> 정보 수정
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Attendance Summary Stats Grid -->
+            <div class="attendance-stats-grid" id="attendanceStatsGrid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 4px;">
+                <!-- Dynamically generated stats card widgets -->
+            </div>
+
+            
+            <!-- Calendar Card -->
+            <div class="calendar-card">
+                <div class="calendar-control">
+                    <div class="month-selector">
+                        <button class="btn-arrow" id="prevMonthBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="current-month-display" id="currentMonthDisplay">2026.06</div>
+                        <button class="btn-arrow" id="nextMonthBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        * 날짜 칸을 클릭하여 근태 상태를 수정할 수 있습니다.
+                    </div>
+                </div>
+                
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Dynamic calendar cells -->
+                </div>
+                
+                <div class="calendar-legend">
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-work);"></div>출근</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-remote);"></div>재택</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-leave);"></div>연차</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-half-leave);"></div>반차</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-absent);"></div>결근</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-late);"></div>지각</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-off);"></div>공가/교육</div>
+                    <div class="legend-item"><div class="legend-color" style="background-color: var(--color-weekend);"></div>휴일 (/)</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Add New Employee -->
+    <div class="modal-overlay" id="addEmployeeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">신규 직원 등록</div>
+                <button class="modal-close" onclick="closeModal('addEmployeeModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addEmployeeForm">
+                    <div class="form-group">
+                        <label for="newEmpName">성명 *</label>
+                        <input type="text" id="newEmpName" class="form-control" placeholder="이름을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newEmpNo">사번 *</label>
+                        <input type="text" id="newEmpNo" class="form-control" placeholder="사번을 입력하세요 (예: 2024030563)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newJoinDate">입사일</label>
+                        <input type="date" id="newJoinDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="newEmail">이메일</label>
+                        <input type="email" id="newEmail" class="form-control" placeholder="email@meta-m.co.kr">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPhone">전화번호</label>
+                        <input type="text" id="newPhone" class="form-control" placeholder="010-XXXX-XXXX">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addEmployeeModal')">취소</button>
+                <button class="btn" id="saveNewEmployeeBtn">등록</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Employee Info -->
+    <div class="modal-overlay" id="editEmployeeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">직원 정보 수정</div>
+                <button class="modal-close" onclick="closeModal('editEmployeeModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editEmployeeForm">
+                    <input type="hidden" id="editEmpId">
+                    <div class="form-group">
+                        <label for="editEmpName">성명 *</label>
+                        <input type="text" id="editEmpName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmpNo">사번 (수정 불가)</label>
+                        <input type="text" id="editEmpNo" class="form-control" readonly style="opacity: 0.6;">
+                    </div>
+                    <div class="form-group">
+                        <label for="editJoinDate">입사일</label>
+                        <input type="date" id="editJoinDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editRetireDate">퇴사일</label>
+                        <input type="date" id="editRetireDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">이메일</label>
+                        <input type="email" id="editEmail" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhone">전화번호</label>
+                        <input type="text" id="editPhone" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editEmployeeModal')">취소</button>
+                <button class="btn" id="saveEditEmployeeBtn">수정 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Attendance Status -->
+    <div class="modal-overlay" id="editAttendanceModal">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="modal-header">
+                <div class="modal-title">근태 상태 변경</div>
+                <button class="modal-close" onclick="closeModal('editAttendanceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 16px; text-align: center;">
+                    <div id="attModalDate" style="font-weight: 700; font-size: 16px;">2026-06-01</div>
+                    <div id="attModalName" style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">김직원 직원의 근태를 변경합니다.</div>
+                </div>
+                
+                <div class="status-grid-select" id="statusSelectGrid">
+                    <button class="status-select-btn" data-status="출근">출근</button>
+                    <button class="status-select-btn" data-status="재택">재택</button>
+                    <button class="status-select-btn" data-status="연차">연차</button>
+                    <button class="status-select-btn" data-status="반차">반차</button>
+                    <button class="status-select-btn" data-status="지각">지각</button>
+                    <button class="status-select-btn" data-status="결근">결근</button>
+                    <button class="status-select-btn" data-status="공가">공가</button>
+                    <button class="status-select-btn" data-status="교육">교육</button>
+                    <button class="status-select-btn" data-status="/">휴일</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editAttendanceModal')">닫기</button>
+            </div>
+    </div>
+
+    <!-- Modal: Upload Excel File -->
+    <div class="modal-overlay" id="uploadExcelModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title">근태 엑셀 파일 업로드</div>
+                <button class="modal-close" onclick="closeModal('uploadExcelModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                    새로운 월의 근태관리 엑셀 파일(.xlsx)을 업로드하세요. 업로드 즉시 데이터가 파싱되어 데이터베이스에 연동됩니다.
+                </div>
+                <form id="uploadExcelForm">
+                    <div class="form-group">
+                        <label for="excelFileInput">엑셀 파일 선택 (.xlsx) *</label>
+                        <input type="file" id="excelFileInput" class="form-control" accept=".xlsx" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('uploadExcelModal')">취소</button>
+                <button class="btn" id="submitExcelUploadBtn">파일 업로드</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Toast message notification -->
+    <div class="toast" id="toastMessage">알림 메시지</div>
+
+    <!-- Password Protection Overlay -->
+    <div class="auth-overlay" id="authOverlay" style="display: flex;">
+        <div class="auth-card">
+            <div class="auth-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>보안 인증</h2>
+            <p style="margin-top: 8px;">직원 근태 관리 시스템에 접속하기 위해<br>사내 공통 비밀번호를 입력해주세요.</p>
+            <div class="form-group" style="margin-top: 24px; width: 100%;">
+                <input type="password" id="accessPasswordInput" class="form-control" placeholder="비밀번호 입력" style="text-align: center; padding: 12px;">
+            </div>
+            <button class="btn" id="loginSubmitBtn" style="width: 100%; margin-top: 12px; padding: 12px; font-weight: 700;">
+                인증 및 접속
+            </button>
+            <div id="authErrorMsg" style="color: #ef4444; font-size: 13px; margin-top: 14px; font-weight: 600; display: none;">
+                비밀번호가 올바르지 않습니다.
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Custom JS -->
+    <script src="/static/js/main_v2.js"></script>
+</body>
+</html>
