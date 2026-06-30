@@ -248,32 +248,31 @@ def get_stats():
     cursor.execute("SELECT COUNT(*) FROM employees WHERE retire_date IS NULL OR retire_date = ''")
     active_employees_count = cursor.fetchone()[0]
     
-    # Today's Date
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    # For demo purpose, if today's data is empty, let's use the latest date in DB
+    # Today's Date / Latest Date
     cursor.execute("SELECT MAX(date) FROM attendance")
     max_date_row = cursor.fetchone()
-    latest_date_in_db = max_date_row[0] if max_date_row[0] else today_str
+    latest_date_in_db = max_date_row[0] if max_date_row[0] else datetime.now().strftime("%Y-%m-%d")
     
-    target_date = latest_date_in_db # use latest date to show interesting stats
+    # Available Months list
+    cursor.execute("SELECT DISTINCT substr(date, 1, 7) as month FROM attendance ORDER BY month DESC")
+    available_months = [row["month"] for row in cursor.fetchall() if row["month"]]
     
-    # Today's (or latest day's) attendance breakdown
-    cursor.execute("""
-        SELECT status, COUNT(*) as count 
-        FROM attendance 
-        WHERE date = ? 
-        GROUP BY status
-    """, (target_date,))
-    today_status_rows = cursor.fetchall()
-    today_stats = {row["status"]: row["count"] for row in today_status_rows}
-    
+    # Get month query parameter
+    requested_month = request.args.get("month", "").strip()
+    if requested_month in available_months:
+        selected_month = requested_month
+    elif available_months:
+        selected_month = available_months[0]
+    else:
+        selected_month = datetime.now().strftime("%Y-%m")
+        
     # Monthly Attendance Trends (last 6 months with data)
     cursor.execute("""
         SELECT substr(date, 1, 7) as month, status, COUNT(*) as count
         FROM attendance
         GROUP BY month, status
         ORDER BY month DESC
-        LIMIT 50
+        LIMIT 100
     """)
     trend_rows = cursor.fetchall()
     
@@ -286,14 +285,43 @@ def get_stats():
         if m not in trends:
             trends[m] = {}
         trends[m][st] = cnt
+
+    # Total Late Ranking (Top 10, count > 0)
+    cursor.execute("""
+        SELECT e.name, e.emp_no, COUNT(a.id) as count
+        FROM employees e
+        JOIN attendance a ON e.id = a.employee_id
+        WHERE a.status = '지각' AND (e.retire_date IS NULL OR e.retire_date = '')
+        GROUP BY e.id
+        HAVING count > 0
+        ORDER BY count DESC
+        LIMIT 10
+    """)
+    total_late_ranking = [dict(row) for row in cursor.fetchall()]
+
+    # Monthly Late Ranking (Top 5 for selected_month, count > 0)
+    cursor.execute("""
+        SELECT e.name, e.emp_no, COUNT(a.id) as count
+        FROM employees e
+        JOIN attendance a ON e.id = a.employee_id
+        WHERE a.status = '지각' AND substr(a.date, 1, 7) = ? AND (e.retire_date IS NULL OR e.retire_date = '')
+        GROUP BY e.id
+        HAVING count > 0
+        ORDER BY count DESC
+        LIMIT 5
+    """, (selected_month,))
+    monthly_late_ranking = [dict(row) for row in cursor.fetchall()]
         
     conn.close()
     
     return jsonify({
         "total_employees": active_employees_count,
-        "stats_date": target_date,
-        "today_stats": today_stats,
-        "monthly_trends": trends
+        "stats_date": latest_date_in_db,
+        "monthly_trends": trends,
+        "total_late_ranking": total_late_ranking,
+        "monthly_late_ranking": monthly_late_ranking,
+        "selected_month": selected_month,
+        "available_months": available_months
     })
 
 # 8. Upload Excel file and sync data

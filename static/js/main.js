@@ -24,10 +24,6 @@ const elements = {
     
     // Stats elements
     statsDateText: document.getElementById('statsDateText'),
-    statTotalEmployees: document.getElementById('statTotalEmployees'),
-    statTodayWork: document.getElementById('statTodayWork'),
-    statTodayRemote: document.getElementById('statTodayRemote'),
-    statTodayLeave: document.getElementById('statTodayLeave'),
     
     // Profile elements
     detailAvatar: document.getElementById('detailAvatar'),
@@ -73,6 +69,7 @@ const elements = {
     uploadExcelModal: document.getElementById('uploadExcelModal'),
     excelFileInput: document.getElementById('excelFileInput'),
     submitExcelUploadBtn: document.getElementById('submitExcelUploadBtn'),
+    lateMonthSelect: document.getElementById('lateMonthSelect'),
 
     // Auth Screen Elements
     authOverlay: document.getElementById('authOverlay'),
@@ -83,8 +80,12 @@ const elements = {
 
 // Init Application
 document.addEventListener('DOMContentLoaded', () => {
-    checkExistingAuth();
-    setupEventListeners();
+    try {
+        checkExistingAuth();
+        setupEventListeners();
+    } catch (e) {
+        alert("근태 시스템 자바스크립트 초기화 에러:\n" + e.message + "\n" + e.stack);
+    }
 });
 
 // Check if user is already authenticated via sessionStorage
@@ -157,9 +158,10 @@ async function fetchEmployees(searchQuery = '') {
     }
 }
 
-async function fetchStats() {
+async function fetchStats(selectedMonth = '') {
     try {
-        const response = await fetch('/api/stats');
+        const url = '/api/stats' + (selectedMonth ? `?month=${selectedMonth}` : '');
+        const response = await fetch(url);
         if (!response.ok) throw new Error('통계 데이터를 불러오지 못했습니다.');
         const stats = await response.json();
         renderDashboard(stats);
@@ -201,6 +203,11 @@ function setupEventListeners() {
         if (e.key === 'Enter') {
             handleLogin();
         }
+    });
+
+    // Lateness Month Selector change
+    elements.lateMonthSelect.addEventListener('change', (e) => {
+        fetchStats(e.target.value);
     });
 
     // Search input typing
@@ -488,89 +495,7 @@ function renderEmployeeList() {
 
 function renderDashboard(data) {
     // Stats Date Display
-    const dateObj = new Date(data.stats_date);
-    elements.statsDateText.innerHTML = `기준 일자: <strong>${data.stats_date}</strong> (기록된 가장 최근 근태일)`;
-    
-    elements.statTotalEmployees.innerHTML = `${data.total_employees} <span class="stat-unit">명</span>`;
-    
-    // Set counts
-    const today = data.today_stats;
-    const workCount = (today["출근"] || 0) + (today["지각"] || 0);
-    const remoteCount = today["재택"] || 0;
-    const leaveCount = (today["연차"] || 0) + (today["반차"] || 0) + (today["공가"] || 0) + (today["교육"] || 0);
-    
-    elements.statTodayWork.innerHTML = `${workCount} <span class="stat-unit">명</span>`;
-    elements.statTodayRemote.innerHTML = `${remoteCount} <span class="stat-unit">명</span>`;
-    elements.statTodayLeave.innerHTML = `${leaveCount} <span class="stat-unit">명</span>`;
-    
-    // 1. Render ratio chart (Doughnut)
-    const ratioCtx = document.getElementById('ratioChart').getContext('2d');
-    
-    if (state.ratioChart) state.ratioChart.destroy();
-    
-    // Gather all statuses present today
-    const labels = Object.keys(today).filter(k => k !== '/');
-    const values = labels.map(k => today[k]);
-    
-    // Palette
-    const colors = {
-        "출근": "#10b981",
-        "재택": "#8b5cf6",
-        "연차": "#f59e0b",
-        "반차": "#eab308",
-        "결근": "#ef4444",
-        "공가": "#3b82f6",
-        "교육": "#3b82f6",
-        "지각": "#ec4899"
-    };
-    
-    const backgroundColors = labels.map(label => colors[label] || '#94a3b8');
-    
-    if (labels.length === 0) {
-        state.ratioChart = new Chart(ratioCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['데이터 없음'],
-                datasets: [{
-                    data: [1],
-                    backgroundColor: ['rgba(255,255,255,0.05)'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    } else {
-        state.ratioChart = new Chart(ratioCtx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255,255,255,0.08)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: '#f8fafc',
-                            font: { family: 'Outfit' }
-                        }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-    }
+    elements.statsDateText.innerHTML = `기준 일자: <strong>${data.stats_date}</strong> (최종 업데이트 완료)`;
     
     // 2. Render monthly trend chart (Bar/Line)
     const trendCtx = document.getElementById('trendChart').getContext('2d');
@@ -578,19 +503,16 @@ function renderDashboard(data) {
     
     // Sort months
     const months = Object.keys(data.monthly_trends).sort();
-    const workData = [];
-    const remoteData = [];
     const leaveData = [];
+    const lateData = [];
     
     months.forEach(m => {
         const monthStats = data.monthly_trends[m];
-        const work = (monthStats["출근"] || 0) + (monthStats["지각"] || 0);
-        const remote = monthStats["재택"] || 0;
-        const leave = (monthStats["연차"] || 0) + (monthStats["반차"] || 0) + (monthStats["공가"] || 0) + (monthStats["교육"] || 0);
+        const leave = (monthStats["연차"] || 0) + (monthStats["반차"] || 0);
+        const late = monthStats["지각"] || 0;
         
-        workData.push(work);
-        remoteData.push(remote);
         leaveData.push(leave);
+        lateData.push(late);
     });
     
     state.trendChart = new Chart(trendCtx, {
@@ -599,26 +521,18 @@ function renderDashboard(data) {
             labels: months.map(m => m.replace('-', '년 ') + '월'),
             datasets: [
                 {
-                    label: '출근',
-                    data: workData,
-                    backgroundColor: 'rgba(16, 185, 129, 0.65)',
-                    borderColor: '#10b981',
-                    borderWidth: 1,
-                    borderRadius: 4
-                },
-                {
-                    label: '재택',
-                    data: remoteData,
-                    backgroundColor: 'rgba(139, 92, 246, 0.65)',
-                    borderColor: '#8b5cf6',
-                    borderWidth: 1,
-                    borderRadius: 4
-                },
-                {
-                    label: '휴가/기타',
+                    label: '연차/반차 사용량 (일)',
                     data: leaveData,
                     backgroundColor: 'rgba(245, 158, 11, 0.65)',
                     borderColor: '#f59e0b',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: '지각 횟수 (회)',
+                    data: lateData,
+                    backgroundColor: 'rgba(236, 72, 153, 0.65)',
+                    borderColor: '#ec4899',
                     borderWidth: 1,
                     borderRadius: 4
                 }
@@ -647,6 +561,80 @@ function renderDashboard(data) {
             }
         }
     });
+
+    // 3. Render Lateness Rankings (Total and Monthly)
+    const totalList = document.getElementById('totalLateRankingList');
+    const monthlyList = document.getElementById('monthlyLateRankingList');
+
+    // Populate Monthly Selector options dynamically if not already populated
+    if (data.available_months && elements.lateMonthSelect.options.length !== data.available_months.length) {
+        elements.lateMonthSelect.innerHTML = '';
+        data.available_months.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            const parts = m.split('-');
+            opt.textContent = `${parts[0]}년 ${parts[1]}월`;
+            elements.lateMonthSelect.appendChild(opt);
+        });
+    }
+    if (data.selected_month) {
+        elements.lateMonthSelect.value = data.selected_month;
+    }
+
+    // Render Total Late Ranking List (Top 10)
+    totalList.innerHTML = '';
+    if (!data.total_late_ranking || data.total_late_ranking.length === 0) {
+        totalList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px; font-size: 13px;">지각 기록이 없습니다.</div>';
+    } else {
+        data.total_late_ranking.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);";
+            
+            // Badge color based on rank
+            let badgeBg = "rgba(255,255,255,0.08)";
+            let badgeColor = "var(--text-secondary)";
+            if (index === 0) { badgeBg = "#ef4444"; badgeColor = "#ffffff"; }
+            else if (index === 1) { badgeBg = "#f59e0b"; badgeColor = "#ffffff"; }
+            else if (index === 2) { badgeBg = "#3b82f6"; badgeColor = "#ffffff"; }
+
+            row.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="width: 24px; height: 24px; border-radius: 50%; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${index + 1}</span>
+                    <span style="font-weight: 600; font-size: 14px;">${item.name}</span>
+                    <span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">(${item.emp_no})</span>
+                </div>
+                <div style="font-weight: 700; color: #ec4899; font-size: 14px;">${item.count}회</div>
+            `;
+            totalList.appendChild(row);
+        });
+    }
+
+    // Render Monthly Late Ranking List (Top 5)
+    monthlyList.innerHTML = '';
+    if (!data.monthly_late_ranking || data.monthly_late_ranking.length === 0) {
+        monthlyList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px; font-size: 13px;">이달의 지각 기록이 없습니다.</div>';
+    } else {
+        data.monthly_late_ranking.forEach((item, index) => {
+            const row = document.createElement('div');
+            row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);";
+            
+            let badgeBg = "rgba(255,255,255,0.08)";
+            let badgeColor = "var(--text-secondary)";
+            if (index === 0) { badgeBg = "#ef4444"; badgeColor = "#ffffff"; }
+            else if (index === 1) { badgeBg = "#f59e0b"; badgeColor = "#ffffff"; }
+            else if (index === 2) { badgeBg = "#3b82f6"; badgeColor = "#ffffff"; }
+
+            row.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="width: 24px; height: 24px; border-radius: 50%; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${index + 1}</span>
+                    <span style="font-weight: 600; font-size: 14px;">${item.name}</span>
+                    <span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">(${item.emp_no})</span>
+                </div>
+                <div style="font-weight: 700; color: #f59e0b; font-size: 14px;">${item.count}회</div>
+            `;
+            monthlyList.appendChild(row);
+        });
+    }
 }
 
 function renderEmployeeProfile() {

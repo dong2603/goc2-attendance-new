@@ -53,44 +53,46 @@
         <section class="dashboard-view" id="dashboardView">
             <div>
                 <h1 class="view-title">GOC2 근태 대시보드</h1>
-                <p class="view-desc" id="statsDateText">금일 근태 현황 및 실시간 통계</p>
+                <p class="view-desc" id="statsDateText">직원 근태 통계 및 월별 근무 추이</p>
             </div>
             
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">활성 직원수</div>
-                    <div class="stat-value" id="statTotalEmployees">0 <span class="stat-unit">명</span></div>
-                </div>
-                <div class="stat-card work">
-                    <div class="stat-label">오늘 출근</div>
-                    <div class="stat-value" id="statTodayWork">0 <span class="stat-unit">명</span></div>
-                </div>
-                <div class="stat-card remote">
-                    <div class="stat-label">오늘 재택</div>
-                    <div class="stat-value" id="statTodayRemote">0 <span class="stat-unit">명</span></div>
-                </div>
-                <div class="stat-card leave">
-                    <div class="stat-label">오늘 휴가</div>
-                    <div class="stat-value" id="statTodayLeave">0 <span class="stat-unit">명</span></div>
-                </div>
-            </div>
-            
-            <div class="chart-section">
+            <div class="chart-section" style="grid-template-columns: 1fr;">
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">월별 출근 및 재택근무 추이</div>
                     </div>
-                    <div style="position: relative; height: 320px;">
+                    <div style="position: relative; height: 380px;">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
-                
+            </div>
+
+            <!-- Lateness Rankings Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+                <!-- Total Late Ranking -->
                 <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">금일 근무 비율</div>
+                    <div class="chart-header" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 12px; margin-bottom: 16px;">
+                        <div class="chart-title" style="color: #ec4899; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-trophy"></i> 누적 지각 랭킹 (Top 10)
+                        </div>
                     </div>
-                    <div style="position: relative; height: 320px;">
-                        <canvas id="ratioChart"></canvas>
+                    <div id="totalLateRankingList" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- dynamic ranking elements -->
+                    </div>
+                </div>
+
+                <!-- Monthly Late Ranking -->
+                <div class="chart-card">
+                    <div class="chart-header" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 12px; margin-bottom: 16px;">
+                        <div class="chart-title" style="color: #f59e0b; display: flex; align-items: center; gap: 8px; justify-content: space-between; width: 100%;">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-calendar-minus"></i> 월별 지각 랭킹 (Top 5)
+                            </span>
+                            <select id="lateMonthSelect" class="form-control" style="width: auto; padding: 4px 10px; font-size: 13px; height: auto; background: rgba(15,23,42,0.8); border-color: var(--panel-border); color: var(--text-primary); cursor: pointer;"></select>
+                        </div>
+                    </div>
+                    <div id="monthlyLateRankingList" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- dynamic ranking elements -->
                     </div>
                 </div>
             </div>
