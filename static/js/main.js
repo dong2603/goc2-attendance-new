@@ -590,16 +590,9 @@ function renderDashboard(data) {
             const row = document.createElement('div');
             row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);";
             
-            // Badge color based on rank
-            let badgeBg = "rgba(255,255,255,0.08)";
-            let badgeColor = "var(--text-secondary)";
-            if (index === 0) { badgeBg = "#ef4444"; badgeColor = "#ffffff"; }
-            else if (index === 1) { badgeBg = "#f59e0b"; badgeColor = "#ffffff"; }
-            else if (index === 2) { badgeBg = "#3b82f6"; badgeColor = "#ffffff"; }
-
             row.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="width: 24px; height: 24px; border-radius: 50%; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${index + 1}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-user" style="color: var(--text-secondary); opacity: 0.6; font-size: 12px;"></i>
                     <span style="font-weight: 600; font-size: 14px;">${item.name}</span>
                     <span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">(${item.emp_no})</span>
                 </div>
@@ -609,24 +602,18 @@ function renderDashboard(data) {
         });
     }
 
-    // Render Monthly Late Ranking List (Top 5)
+    // Render Monthly Late Ranking List (All)
     monthlyList.innerHTML = '';
     if (!data.monthly_late_ranking || data.monthly_late_ranking.length === 0) {
         monthlyList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px; font-size: 13px;">이달의 지각 기록이 없습니다.</div>';
     } else {
-        data.monthly_late_ranking.forEach((item, index) => {
+        data.monthly_late_ranking.forEach((item) => {
             const row = document.createElement('div');
             row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);";
             
-            let badgeBg = "rgba(255,255,255,0.08)";
-            let badgeColor = "var(--text-secondary)";
-            if (index === 0) { badgeBg = "#ef4444"; badgeColor = "#ffffff"; }
-            else if (index === 1) { badgeBg = "#f59e0b"; badgeColor = "#ffffff"; }
-            else if (index === 2) { badgeBg = "#3b82f6"; badgeColor = "#ffffff"; }
-
             row.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="width: 24px; height: 24px; border-radius: 50%; background: ${badgeBg}; color: ${badgeColor}; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${index + 1}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-user" style="color: var(--text-secondary); opacity: 0.6; font-size: 12px;"></i>
                     <span style="font-weight: 600; font-size: 14px;">${item.name}</span>
                     <span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">(${item.emp_no})</span>
                 </div>

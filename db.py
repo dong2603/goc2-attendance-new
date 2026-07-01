@@ -1,7 +1,11 @@
 import sqlite3
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "attendance.db")
+DB_DIR = os.environ.get("DATABASE_DIR", BASE_DIR)
+DB_PATH = os.path.join(DB_DIR, "attendance.db")
+
+# Auto create DB directory if it does not exist
+os.makedirs(DB_DIR, exist_ok=True)
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)

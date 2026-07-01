@@ -286,7 +286,7 @@ def get_stats():
             trends[m] = {}
         trends[m][st] = cnt
 
-    # Total Late Ranking (Top 10, count > 0)
+    # Total Late Ranking (count > 0)
     cursor.execute("""
         SELECT e.name, e.emp_no, COUNT(a.id) as count
         FROM employees e
@@ -295,11 +295,10 @@ def get_stats():
         GROUP BY e.id
         HAVING count > 0
         ORDER BY count DESC
-        LIMIT 10
     """)
     total_late_ranking = [dict(row) for row in cursor.fetchall()]
 
-    # Monthly Late Ranking (Top 5 for selected_month, count > 0)
+    # Monthly Late Ranking (for selected_month, count > 0)
     cursor.execute("""
         SELECT e.name, e.emp_no, COUNT(a.id) as count
         FROM employees e
@@ -308,7 +307,6 @@ def get_stats():
         GROUP BY e.id
         HAVING count > 0
         ORDER BY count DESC
-        LIMIT 5
     """, (selected_month,))
     monthly_late_ranking = [dict(row) for row in cursor.fetchall()]
         
